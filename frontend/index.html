@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arcana — Interactive Tarot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="stars" id="stars"></div>
+
+  <!-- ── HEADER ─────────────────────────────────────────── -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="#" class="logo" onclick="showView('home')">✦ ARCANA</a>
+      <nav class="nav">
+        <span id="quota-badge" class="quota-badge" style="display:none"></span>
+        <button class="btn-ghost" id="btn-history" onclick="showView('history')" style="display:none">History</button>
+        <button class="btn-ghost" id="btn-premium-nav" onclick="showView('premium')">✦ Premium</button>
+        <button class="btn-ghost" id="btn-login" onclick="openModal('auth')">Sign in</button>
+        <button class="btn-ghost" id="btn-user" style="display:none" onclick="toggleUserMenu()"></button>
+      </nav>
+    </div>
+    <div class="user-menu" id="user-menu" style="display:none">
+      <div class="user-menu-item" onclick="showView('history')">My readings</div>
+      <div class="user-menu-item" onclick="manageSubscription()">Manage subscription</div>
+      <div class="user-menu-item danger" onclick="logout()">Sign out</div>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════════════════════════
+       HOME VIEW — Question input
+  ══════════════════════════════════════════════════════ -->
+  <main class="view active" id="view-home">
+
+    <section class="hero">
+      <p class="hero-subtitle">The cards are listening</p>
+      <h1 class="hero-title">What would you<br/>like to know?</h1>
+    </section>
+
+    <!-- Question box -->
+    <div class="question-container">
+      <div class="question-box">
+        <textarea
+          id="question-input"
+          class="question-input"
+          placeholder="Ask your question… e.g. &quot;Should I change careers?&quot; or &quot;What does this relationship hold for me?&quot;"
+          maxlength="300"
+          rows="3"
+          oninput="updateCharCount(this)"
+        ></textarea>
+        <div class="question-footer">
+          <span class="char-count" id="char-count">0 / 300</span>
+        </div>
+      </div>
+
+      <!-- Spread selector -->
+      <div class="spread-selector">
+        <button class="spread-btn active" data-spread="1_carte" onclick="selectSpread(this)">
+          <span class="spread-btn-icon">☽</span>
+          <span class="spread-btn-label">Single Card</span>
+          <span class="spread-btn-tag free">Free</span>
+        </button>
+        <button class="spread-btn" data-spread="oui_non" onclick="selectSpread(this)">
+          <span class="spread-btn-icon">◈</span>
+          <span class="spread-btn-label">Yes / No</span>
+          <span class="spread-btn-tag premium">✦</span>
+        </button>
+        <button class="spread-btn" data-spread="passe_present_futur" onclick="selectSpread(this)">
+          <span class="spread-btn-icon">⟁</span>
+          <span class="spread-btn-label">Past · Present · Future</span>
+          <span class="spread-btn-tag premium">✦</span>
+        </button>
+        <button class="spread-btn" data-spread="croix_celtique" onclick="selectSpread(this)">
+          <span class="spread-btn-icon">✦</span>
+          <span class="spread-btn-label">Celtic Cross</span>
+          <span class="spread-btn-tag premium">✦</span>
+        </button>
+      </div>
+
+      <button class="btn-ask" id="btn-ask" onclick="askQuestion()">
+        <span id="btn-ask-text">Reveal my cards</span>
+        <span class="btn-ask-icon">→</span>
+      </button>
+
+      <p class="free-note" id="free-note">3 free readings per day · No account required</p>
+    </div>
+
+  </main>
+
+  <!-- ══════════════════════════════════════════════════════
+       READING VIEW
+  ══════════════════════════════════════════════════════ -->
+  <main class="view" id="view-reading">
+
+    <!-- Question recap -->
+    <div class="reading-question" id="reading-question"></div>
+
+    <!-- Cards -->
+    <div class="cards-area" id="cards-area"></div>
+
+    <!-- Interpretation -->
+    <div class="interpretation-box" id="interpretation-box" style="display:none">
+      <div class="interp-header">
+        <span class="interp-icon">✦</span>
+        <h3>Your Reading</h3>
+      </div>
+      <div class="interp-text" id="interp-text"></div>
+      <div class="interp-cursor" id="interp-cursor"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="reading-actions" id="reading-actions" style="display:none">
+      <button class="btn-primary" onclick="showView('home')">Ask another question</button>
+    </div>
+
+  </main>
+
+  <!-- ══════════════════════════════════════════════════════
+       HISTORY VIEW
+  ══════════════════════════════════════════════════════ -->
+  <main class="view" id="view-history">
+    <div class="reading-header">
+      <button class="btn-back" onclick="showView('home')">← Back</button>
+      <h2>My Readings</h2>
+    </div>
+    <div class="history-list" id="history-list">
+      <div class="loading-spinner"></div>
+    </div>
+  </main>
+
+  <!-- ══════════════════════════════════════════════════════
+       PREMIUM VIEW
+  ══════════════════════════════════════════════════════ -->
+  <main class="view" id="view-premium">
+    <div class="reading-header">
+      <button class="btn-back" onclick="showView('home')">← Back</button>
+    </div>
+    <div class="premium-page">
+      <div class="premium-badge">✦ PREMIUM</div>
+      <h2 class="premium-title">Unlock the full reading</h2>
+      <p class="premium-subtitle">Unlimited questions. All spreads. Deeper AI interpretations.</p>
+
+      <div class="premium-features">
+        <div class="feature-item">
+          <span class="feature-icon">∞</span>
+          <div>
+            <strong>Unlimited readings</strong>
+            <p>No daily limit — ask whenever you feel called</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">◈</span>
+          <div>
+            <strong>All 4 spreads unlocked</strong>
+            <p>Yes/No, Past·Present·Future, Celtic Cross</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">✦</span>
+          <div>
+            <strong>Deep AI interpretations</strong>
+            <p>Rich, detailed readings tailored to your question</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">☽</span>
+          <div>
+            <strong>Full reading history</strong>
+            <p>Access all your past readings anytime</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="premium-cta">
+        <div class="premium-price">
+          <span class="price-amount">€5</span>
+          <span class="price-period">/ month</span>
+        </div>
+        <button class="btn-primary large" onclick="subscribePremium()">Begin your journey</button>
+        <p class="premium-note">Cancel anytime · Secure payment by Stripe</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ── AUTH MODAL ───────────────────────────────────────── -->
+  <div class="modal-overlay" id="modal-auth" onclick="closeModalOnOverlay(event)">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('auth')">✕</button>
+      <div class="modal-tabs">
+        <button class="tab active" id="tab-login" onclick="switchTab('login')">Sign in</button>
+        <button class="tab" id="tab-register" onclick="switchTab('register')">Create account</button>
+      </div>
+      <form id="form-login" class="auth-form" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="login-email" placeholder="your@email.com" required />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" required />
+        </div>
+        <div class="form-error" id="login-error"></div>
+        <button type="submit" class="btn-primary full">Sign in</button>
+      </form>
+      <form id="form-register" class="auth-form hidden" onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label>First name</label>
+          <input type="text" id="reg-prenom" placeholder="Your first name" required />
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="reg-email" placeholder="your@email.com" required />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="reg-password" placeholder="Min. 8 characters" required minlength="8" />
+        </div>
+        <div class="form-error" id="reg-error"></div>
+        <button type="submit" class="btn-primary full">Create account</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- config.js sets window.API_BASE_URL for production; safe to omit locally -->
+  <script src="config.js" onerror="void(0)"></script>
+  <script src="auth.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
