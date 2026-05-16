@@ -14,3 +14,4 @@ stripe==11.3.0
 httpx==0.28.0
 pydantic[email]==2.10.3
 pydantic-settings==2.6.1
+slowapi==0.1.9
