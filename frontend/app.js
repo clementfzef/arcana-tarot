@@ -314,6 +314,9 @@ async function loadHistory() {
       const names = t.cartes.map(c => c.nom).join(' · ');
       const expIn = t.expires_at ? Math.max(0, Math.ceil((new Date(t.expires_at) - new Date()) / 86400000)) : null;
       const expBadge = expIn !== null ? `<span class="history-item-exp">expires in ${expIn}d</span>` : '';
+      const preview = t.interpretation
+        ? t.interpretation.slice(0, 180) + (t.interpretation.length > 180 ? '…' : '')
+        : '<em>No interpretation saved</em>';
       return `<div class="history-item" onclick="openHistoryDetail(${idx})">
         <div class="history-item-header">
           <span class="history-item-type">${SPREAD_NAMES[t.type] || t.type}</span>
@@ -321,7 +324,8 @@ async function loadHistory() {
         </div>
         ${question ? `<div class="history-item-question">"${question}"</div>` : ''}
         <div class="history-item-cards">${names}</div>
-        <div class="history-item-preview">${t.interpretation ? t.interpretation.slice(0, 120) + '…' : '<em>tap to view reading</em>'}</div>
+        <div class="history-item-preview">${preview}</div>
+        <div class="history-item-cta">Tap to read full interpretation →</div>
       </div>`;
     }).join('');
   } catch {
