@@ -201,14 +201,36 @@ async function subscribePremium() {
 }
 
 async function manageSubscription() {
-  toggleUserMenu();
+  // Hide user menu if open
+  const menu = document.getElementById('user-menu');
+  if (menu) menu.style.display = 'none';
+
+  // Not logged in → invite to sign in
+  if (!currentUser) {
+    showToast('Please sign in first.', 'error');
+    openModal('auth');
+    return;
+  }
+
+  // Logged in but no active subscription → go to Premium page to subscribe
+  if (!currentUser.is_premium) {
+    showToast('You have no active subscription. Subscribe to Premium first.', 'error');
+    showView('premium');
+    return;
+  }
+
+  // Has subscription → open Stripe Customer Portal
   try {
     const res = await fetch(`${API}/stripe/portal`, {
       method: 'POST',
       headers: authHeaders(),
     });
     const data = await res.json();
-    if (data.portal_url) window.location.href = data.portal_url;
+    if (data.portal_url) {
+      window.location.href = data.portal_url;
+    } else {
+      showToast(data.detail || 'Unable to open subscription portal.', 'error');
+    }
   } catch {
     showToast('Unable to open subscription portal.', 'error');
   }
