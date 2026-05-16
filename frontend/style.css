@@ -1446,11 +1446,13 @@ body:has(#view-home.active) .stars { display: none; }
   justify-content: center;
   align-items: flex-start;
   gap: 1rem;
-  min-height: 250px;
-  margin: 0 auto 1.5rem;
+  min-height: 240px;
+  width: 100%;
+  margin: 0 auto 1rem;
   position: relative;
   z-index: 2;
 }
+.draw-hint { width: 100%; }
 .reveal-slot {
   display: flex;
   flex-direction: column;
@@ -1480,8 +1482,9 @@ body:has(#view-home.active) .stars { display: none; }
 /* The deck of 22 face-down cards */
 .card-deck {
   display: grid;
-  grid-template-columns: repeat(11, 1fr);
-  gap: 0.4rem;
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+  gap: 0.5rem;
+  width: 100%;
   max-width: 720px;
   margin: 1.5rem auto 0;
   padding: 0 1rem;
@@ -1506,6 +1509,8 @@ body:has(#view-home.active) .stars { display: none; }
 }
 
 .deck-card {
+  width: 100%;
+  min-width: 30px;
   aspect-ratio: 2 / 3;
   background: linear-gradient(135deg, #1a1430 0%, #0e0a1c 100%);
   border: 1px solid rgba(201,168,76,0.3);
