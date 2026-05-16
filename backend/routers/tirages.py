@@ -185,6 +185,7 @@ async def effectuer_tirage(
     return {
         "id": tirage_id,
         "type": body.type,
+        "question": body.question,
         "cartes": [c.model_dump() for c in cartes_result],
         "quota_restant": quota_restant,
     }

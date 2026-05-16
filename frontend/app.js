@@ -80,14 +80,15 @@ async function askQuestion() {
   // Switch to reading view
   showView('reading');
 
-  // Show question recap
-  const recap = document.getElementById('reading-question');
-  recap.innerHTML = `<span>${SPREAD_NAMES[currentSpread]}</span>"${question}"`;
-
-  // Reset
+  // Reset everything in the reading view BEFORE showing the new content
   document.getElementById('cards-area').innerHTML = '<div class="loading-spinner"></div>';
   document.getElementById('interpretation-box').style.display = 'none';
   document.getElementById('reading-actions').style.display = 'none';
+  document.getElementById('interp-text').textContent = '';
+
+  // Show question recap with the EXACT question being asked
+  const recap = document.getElementById('reading-question');
+  recap.innerHTML = `<span>${SPREAD_NAMES[currentSpread]}</span>"${question}"`;
 
   try {
     const res = await fetch(`${API}/tirages/`, {
@@ -247,7 +248,8 @@ async function startInterpretation() {
       body: JSON.stringify({
         type:      currentSpread,
         cartes:    lastTirageData.cartes,
-        question:  currentQuestion,
+        // Use question from the tirage payload (authoritative) and fall back to currentQuestion
+        question:  (lastTirageData && lastTirageData.question) || currentQuestion,
         tirage_id: lastTirageData.id,
       }),
     });
