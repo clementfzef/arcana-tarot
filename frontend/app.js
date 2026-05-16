@@ -6,7 +6,7 @@ const SPREAD_NAMES = {
   '1_carte':             'Single Card',
   'oui_non':             'Yes / No',
   'passe_present_futur': 'Past · Present · Future',
-  'croix_celtique':      'Celtic Cross',
+  'croix_celtique':      'Sacred Cross',
 };
 
 const CARD_ICONS = [
@@ -120,101 +120,129 @@ async function askQuestion() {
   }
 }
 
-// ── RENDER — MANUAL DRAW (user reveals each card by tapping) ────
-// State of revealed cards for the current reading
-let revealedCount = 0;
+// ── RENDER — DECK PICK (user chooses cards from a 22-card spread) ──
+// User picks N cards from the visual deck. Visually they choose; under the
+// hood the server's pre-drawn cards are assigned in order to keep the draw
+// cryptographically fair.
+
+let pickOrder = [];          // visual deck slots the user has clicked, in order
+let drawnByPick = [];        // cards actually drawn, in order picked
 
 function renderAndAutoFlip(cartes) {
   const area = document.getElementById('cards-area');
   area.innerHTML = '';
-  revealedCount = 0;
+  pickOrder = [];
+  drawnByPick = [];
 
-  // Magic circle behind the cards
+  const N = cartes.length;
+  const DECK_SIZE = 22;
+
+  // Magic circle backdrop
   const circle = document.createElement('div');
   circle.className = 'magic-circle';
   area.appendChild(circle);
 
-  // Hint above the cards
+  // Hint + counter
   const hint = document.createElement('div');
   hint.className = 'draw-hint';
   hint.id = 'draw-hint';
-  hint.innerHTML = `<span class="draw-hint-icon">✦</span> Tap each card to reveal your reading <span class="draw-hint-icon">✦</span><br><small class="draw-hint-sub">Take a breath, focus on your question, and choose when each card turns.</small>`;
+  hint.innerHTML = `
+    <span class="draw-hint-icon">✦</span> Choose your card${N > 1 ? 's' : ''} <span class="draw-hint-icon">✦</span>
+    <br><small class="draw-hint-sub">Focus on your question and tap <strong id="draw-counter">${N}</strong> card${N > 1 ? 's' : ''} from the deck below.</small>`;
   area.appendChild(hint);
 
-  // Container for the cards (kept inline-flex / grid by existing CSS)
-  const cardsRow = document.createElement('div');
-  cardsRow.className = 'cards-row';
-  area.appendChild(cardsRow);
+  // "Revealed slots" — empty placeholders that fill up as the user picks
+  const revealedRow = document.createElement('div');
+  revealedRow.className = 'revealed-row';
+  revealedRow.id = 'revealed-row';
+  cartes.forEach((c, i) => {
+    const slot = document.createElement('div');
+    slot.className = 'reveal-slot empty';
+    slot.id = `slot-${i}`;
+    slot.innerHTML = `
+      ${N > 1 ? `<div class="card-position-label">${c.position}</div>` : ''}
+      <div class="reveal-slot-placeholder">${i + 1}</div>`;
+    revealedRow.appendChild(slot);
+  });
+  area.appendChild(revealedRow);
 
-  cartes.forEach((card, i) => {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'tarot-card-wrapper unrevealed';
-    wrapper.dataset.index = i;
+  // The 22-card deck (face-down)
+  const deck = document.createElement('div');
+  deck.className = 'card-deck';
+  deck.id = 'card-deck';
+  for (let d = 0; d < DECK_SIZE; d++) {
+    const back = document.createElement('div');
+    back.className = 'deck-card';
+    back.dataset.deckIndex = d;
+    back.innerHTML = `<div class="deck-card-inner">
+        <div class="deck-card-symbol">✦</div>
+      </div>`;
+    back.addEventListener('click', () => pickFromDeck(d, cartes));
+    // Stagger appear animation
+    back.style.animation = `deckCardAppear 0.4s ease ${d * 0.025}s both`;
+    deck.appendChild(back);
+  }
+  area.appendChild(deck);
+}
 
-    if (cartes.length > 1) {
-      const label = document.createElement('div');
-      label.className = 'card-position-label';
-      label.textContent = card.position;
-      wrapper.appendChild(label);
-    }
+function pickFromDeck(deckIndex, cartes) {
+  const deckCard = document.querySelector(`.deck-card[data-deck-index="${deckIndex}"]`);
+  if (!deckCard || deckCard.classList.contains('picked')) return;
+  if (drawnByPick.length >= cartes.length) return;
 
-    const cardEl = document.createElement('div');
-    cardEl.className = 'tarot-card pulse-draw';
-    cardEl.id = `card-${i}`;
-    cardEl.dataset.index = i;
-    cardEl.innerHTML = `
-      <div class="tarot-card-inner">
-        <div class="card-face card-back">
-          <div class="card-back-symbol">✦</div>
-          <div class="card-back-hint">tap to draw</div>
-        </div>
-        <div class="card-face card-front" onclick="event.stopPropagation(); openCardDetail(${i})">
-          <div class="card-front-number">${card.id}</div>
-          <div class="card-front-icon">${CARD_ICONS[card.id] || '✦'}</div>
-          <div class="card-front-name">${card.nom}</div>
-          ${card.inversee ? '<div class="card-reversed-label">↻ Reversed</div>' : ''}
-          <div class="card-front-hint">tap for details</div>
+  // The "next" actual card from the server's draw is assigned to this pick
+  const pickIdx = drawnByPick.length;
+  const card = cartes[pickIdx];
+
+  deckCard.classList.add('picked');
+  pickOrder.push(deckIndex);
+  drawnByPick.push(pickIdx);
+
+  // Visual: deck card "flies" out (shrink/fade) — its reveal happens in the slot
+  setTimeout(() => deckCard.classList.add('vanish'), 200);
+
+  // Update counter
+  const counter = document.getElementById('draw-counter');
+  const remaining = cartes.length - drawnByPick.length;
+  if (counter) counter.textContent = remaining;
+
+  // Reveal the card in its slot
+  const slot = document.getElementById(`slot-${pickIdx}`);
+  if (slot) {
+    slot.classList.remove('empty');
+    slot.innerHTML = `
+      ${cartes.length > 1 ? `<div class="card-position-label">${card.position}</div>` : ''}
+      <div class="tarot-card-wrapper">
+        <div class="tarot-card ${card.inversee ? 'reversed' : 'flipped'}" id="card-${pickIdx}">
+          <div class="tarot-card-inner">
+            <div class="card-face card-back"><div class="card-back-symbol">✦</div></div>
+            <div class="card-face card-front" onclick="openCardDetail(${pickIdx})">
+              <div class="card-front-number">${card.id}</div>
+              <div class="card-front-icon">${CARD_ICONS[card.id] || '✦'}</div>
+              <div class="card-front-name">${card.nom}</div>
+              ${card.inversee ? '<div class="card-reversed-label">↻ Reversed</div>' : ''}
+              <div class="card-front-hint">tap for details</div>
+            </div>
+          </div>
         </div>
       </div>`;
 
-    // Click handler: only triggers when the card is still face-down
-    cardEl.addEventListener('click', () => revealCard(i, cartes));
-
-    wrapper.appendChild(cardEl);
-    cardsRow.appendChild(wrapper);
-  });
-
-  // Light entrance animation: cards appear one after another (still face-down)
-  cardsRow.querySelectorAll('.tarot-card-wrapper').forEach((w, i) => {
-    w.style.animation = `cardDealIn 0.5s ease ${i * 0.15}s both`;
-  });
-}
-
-function revealCard(index, cartes) {
-  const cardEl = document.getElementById(`card-${index}`);
-  if (!cardEl || cardEl.dataset.revealed === '1') return;
-  cardEl.dataset.revealed = '1';
-
-  // Mark wrapper as revealed
-  cardEl.parentElement.classList.remove('unrevealed');
-  cardEl.classList.remove('pulse-draw');
-
-  // Flip
-  const card = cartes[index];
-  cardEl.classList.add(card.inversee ? 'reversed' : 'flipped');
-  spawnParticles(cardEl);
-
-  revealedCount += 1;
-
-  // Hide hint once first card is revealed
-  if (revealedCount === 1) {
-    const hint = document.getElementById('draw-hint');
-    if (hint) hint.classList.add('fade-out');
+    const newCardEl = document.getElementById(`card-${pickIdx}`);
+    if (newCardEl) spawnParticles(newCardEl);
   }
 
-  // When ALL cards are revealed → start AI interpretation
-  if (revealedCount === cartes.length) {
-    setTimeout(() => startInterpretation(), 900);
+  // All picked → fade out remaining deck cards + start interpretation
+  if (drawnByPick.length === cartes.length) {
+    const hint = document.getElementById('draw-hint');
+    if (hint) hint.classList.add('fade-out');
+
+    const deck = document.getElementById('card-deck');
+    if (deck) {
+      deck.classList.add('deck-fade-out');
+      setTimeout(() => { deck.style.display = 'none'; }, 700);
+    }
+
+    setTimeout(() => startInterpretation(), 1200);
   }
 }
 

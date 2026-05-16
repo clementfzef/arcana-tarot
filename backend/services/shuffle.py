@@ -14,16 +14,11 @@ POSITIONS = {
     "oui_non": ["Yes", "No"],
     "passe_present_futur": ["Past", "Present", "Future"],
     "croix_celtique": [
-        "Present Situation",
-        "Crossing (obstacle or aid)",
-        "Recent Past",
-        "Near Future",
-        "Unconscious Foundation",
-        "External Influences",
-        "Attitude and Hopes",
-        "Environment",
-        "Hopes and Fears",
-        "Final Outcome",
+        "Heart of the Matter",
+        "The Challenge",
+        "The Past",
+        "The Future",
+        "The Outcome",
     ],
 }
 
@@ -31,7 +26,7 @@ NB_CARTES = {
     "1_carte": 1,
     "oui_non": 2,
     "passe_present_futur": 3,
-    "croix_celtique": 10,
+    "croix_celtique": 5,
 }
 
 # Cartes réservées aux premium

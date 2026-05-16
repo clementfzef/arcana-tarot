@@ -15,7 +15,7 @@ SPREAD_NAMES = {
     "1_carte":             "Single Card",
     "oui_non":             "Yes / No",
     "passe_present_futur": "Past / Present / Future",
-    "croix_celtique":      "Celtic Cross",
+    "croix_celtique":      "Sacred Cross (5-card spread)",
 }
 
 
