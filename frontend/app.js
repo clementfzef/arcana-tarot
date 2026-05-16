@@ -120,19 +120,36 @@ async function askQuestion() {
   }
 }
 
-// ── RENDER + AUTO FLIP ─────────────────────────────
+// ── RENDER — MANUAL DRAW (user reveals each card by tapping) ────
+// State of revealed cards for the current reading
+let revealedCount = 0;
+
 function renderAndAutoFlip(cartes) {
   const area = document.getElementById('cards-area');
   area.innerHTML = '';
+  revealedCount = 0;
 
-  // Add magic circle behind cards
+  // Magic circle behind the cards
   const circle = document.createElement('div');
   circle.className = 'magic-circle';
   area.appendChild(circle);
 
+  // Hint above the cards
+  const hint = document.createElement('div');
+  hint.className = 'draw-hint';
+  hint.id = 'draw-hint';
+  hint.innerHTML = `<span class="draw-hint-icon">✦</span> Tap each card to reveal your reading <span class="draw-hint-icon">✦</span><br><small class="draw-hint-sub">Take a breath, focus on your question, and choose when each card turns.</small>`;
+  area.appendChild(hint);
+
+  // Container for the cards (kept inline-flex / grid by existing CSS)
+  const cardsRow = document.createElement('div');
+  cardsRow.className = 'cards-row';
+  area.appendChild(cardsRow);
+
   cartes.forEach((card, i) => {
     const wrapper = document.createElement('div');
-    wrapper.className = 'tarot-card-wrapper';
+    wrapper.className = 'tarot-card-wrapper unrevealed';
+    wrapper.dataset.index = i;
 
     if (cartes.length > 1) {
       const label = document.createElement('div');
@@ -142,15 +159,17 @@ function renderAndAutoFlip(cartes) {
     }
 
     const cardEl = document.createElement('div');
-    cardEl.className = 'tarot-card';
+    cardEl.className = 'tarot-card pulse-draw';
     cardEl.id = `card-${i}`;
+    cardEl.dataset.index = i;
     cardEl.innerHTML = `
       <div class="tarot-card-inner">
         <div class="card-face card-back">
           <div class="card-back-symbol">✦</div>
+          <div class="card-back-hint">tap to draw</div>
         </div>
-        <div class="card-face card-front" onclick="openCardDetail(${i})">
-          <div class="card-front-number">${card.nom.split(' ').length > 2 ? card.id : card.id}</div>
+        <div class="card-face card-front" onclick="event.stopPropagation(); openCardDetail(${i})">
+          <div class="card-front-number">${card.id}</div>
           <div class="card-front-icon">${CARD_ICONS[card.id] || '✦'}</div>
           <div class="card-front-name">${card.nom}</div>
           ${card.inversee ? '<div class="card-reversed-label">↻ Reversed</div>' : ''}
@@ -158,18 +177,45 @@ function renderAndAutoFlip(cartes) {
         </div>
       </div>`;
 
-    wrapper.appendChild(cardEl);
-    area.appendChild(wrapper);
+    // Click handler: only triggers when the card is still face-down
+    cardEl.addEventListener('click', () => revealCard(i, cartes));
 
-    // Auto flip with staggered delay + particles
-    setTimeout(() => {
-      cardEl.classList.add(card.inversee ? 'reversed' : 'flipped');
-      spawnParticles(cardEl);
-      if (i === cartes.length - 1) {
-        setTimeout(() => startInterpretation(), 800);
-      }
-    }, 500 + i * 400);
+    wrapper.appendChild(cardEl);
+    cardsRow.appendChild(wrapper);
   });
+
+  // Light entrance animation: cards appear one after another (still face-down)
+  cardsRow.querySelectorAll('.tarot-card-wrapper').forEach((w, i) => {
+    w.style.animation = `cardDealIn 0.5s ease ${i * 0.15}s both`;
+  });
+}
+
+function revealCard(index, cartes) {
+  const cardEl = document.getElementById(`card-${index}`);
+  if (!cardEl || cardEl.dataset.revealed === '1') return;
+  cardEl.dataset.revealed = '1';
+
+  // Mark wrapper as revealed
+  cardEl.parentElement.classList.remove('unrevealed');
+  cardEl.classList.remove('pulse-draw');
+
+  // Flip
+  const card = cartes[index];
+  cardEl.classList.add(card.inversee ? 'reversed' : 'flipped');
+  spawnParticles(cardEl);
+
+  revealedCount += 1;
+
+  // Hide hint once first card is revealed
+  if (revealedCount === 1) {
+    const hint = document.getElementById('draw-hint');
+    if (hint) hint.classList.add('fade-out');
+  }
+
+  // When ALL cards are revealed → start AI interpretation
+  if (revealedCount === cartes.length) {
+    setTimeout(() => startInterpretation(), 900);
+  }
 }
 
 // ── CARD DETAIL MODAL ─────────────────────────────
