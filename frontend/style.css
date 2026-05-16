@@ -1111,3 +1111,25 @@ body:has(#view-home.active) .stars { display: none; }
   font-style: italic;
   font-size: 0.7rem;
 }
+
+/* ── FORM CHECKBOX (Terms acceptance) ─────────── */
+.form-checkbox {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  margin: 1rem 0 0.5rem;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+.form-checkbox input[type="checkbox"] {
+  margin-top: 0.2rem;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--gold);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.form-checkbox label { cursor: pointer; }
+.form-checkbox a { color: var(--gold); text-decoration: underline; }
+.form-checkbox a:hover { color: var(--gold-light); }
