@@ -52,7 +52,7 @@ def tirer_cartes(type_tirage: TirageType, all_card_ids: list[int]) -> list[dict]
     for i in range(nb):
         j = rng.randint(i, len(pool) - 1)
         pool[i], pool[j] = pool[j], pool[i]
-        inversee = rng.random() < 0.30  # 30% de chance d'être inversée
+        inversee = rng.random() < 0.50  # 50/50 — chaque carte a une chance égale d'être droite ou inversée
         drawn.append({
             "card_id": pool[i],
             "position": positions[i],
