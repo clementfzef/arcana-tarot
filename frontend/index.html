@@ -21,6 +21,7 @@
         <span id="quota-badge" class="quota-badge" style="display:none"></span>
         <button class="btn-ghost" id="btn-history" onclick="showView('history')" style="display:none">History</button>
         <button class="btn-ghost" id="btn-premium-nav" onclick="showView('premium')">✦ Premium</button>
+        <button class="btn-ghost btn-legal" onclick="showView('legal')" title="Legal & Terms">⚖</button>
         <button class="btn-ghost" id="btn-login" onclick="openModal('auth')">Sign in</button>
         <button class="btn-ghost" id="btn-user" style="display:none" onclick="toggleUserMenu()"></button>
       </nav>
@@ -28,6 +29,7 @@
     <div class="user-menu" id="user-menu" style="display:none">
       <div class="user-menu-item" onclick="showView('history')">My readings</div>
       <div class="user-menu-item" onclick="manageSubscription()">Manage subscription</div>
+      <div class="user-menu-item" onclick="showView('legal')">Legal & Terms</div>
       <div class="user-menu-item danger" onclick="logout()">Sign out</div>
     </div>
   </header>
@@ -187,6 +189,147 @@
     </div>
   </main>
 
+  <!-- ══════════════════════════════════════════════════════
+       LEGAL VIEW — Mentions légales, CGU, CGV, Privacy, Cookies
+  ══════════════════════════════════════════════════════ -->
+  <main class="view" id="view-legal">
+    <div class="reading-header">
+      <button class="btn-back" onclick="showView('home')">← Back</button>
+      <h2 class="page-title">Legal & Terms</h2>
+    </div>
+
+    <div class="legal-page">
+
+      <div class="legal-disclaimer-banner">
+        <strong>⚠ Entertainment only.</strong> Divination is a divinatory experience designed for entertainment and self-reflection.
+        Card readings and AI-generated interpretations <strong>must not</strong> be relied upon for medical, financial, legal,
+        psychological or any other professional decisions. Always consult a qualified professional.
+      </div>
+
+      <nav class="legal-toc">
+        <a href="#legal-notice">1. Legal Notice</a>
+        <a href="#legal-tos">2. Terms of Use</a>
+        <a href="#legal-sale">3. Terms of Sale</a>
+        <a href="#legal-privacy">4. Privacy Policy</a>
+        <a href="#legal-cookies">5. Cookies</a>
+        <a href="#legal-disclaimer">6. Disclaimer</a>
+        <a href="#legal-contact">7. Contact</a>
+      </nav>
+
+      <section id="legal-notice" class="legal-section">
+        <h3>1. Legal Notice (Mentions légales)</h3>
+        <p><strong>Service name:</strong> Divination</p>
+        <p><strong>Service URL:</strong> https://arcana-tarot-142.netlify.app</p>
+        <p><strong>Publisher / Editor of publication:</strong> Individual operator (sole proprietor).</p>
+        <p><strong>Contact email:</strong> novavelay.contact@gmail.com</p>
+        <p><strong>Hosting:</strong></p>
+        <ul>
+          <li><strong>Frontend:</strong> Netlify, Inc. — 512 2nd Street, Suite 200, San Francisco, CA 94107, USA (CDN with EU edge nodes).</li>
+          <li><strong>Backend:</strong> Render Services, Inc. — Frankfurt region (EU).</li>
+          <li><strong>Database:</strong> Supabase, Inc. — eu-west-1 (Ireland).</li>
+          <li><strong>AI interpretations:</strong> Groq, Inc. (US-based, used only to generate reading text).</li>
+          <li><strong>Payments:</strong> Stripe Payments Europe Ltd. — 1 Grand Canal Street Lower, Dublin 2, Ireland.</li>
+        </ul>
+        <p>The website is operated as a non-professional / individual service. No commercial register registration applies at this scale.</p>
+      </section>
+
+      <section id="legal-tos" class="legal-section">
+        <h3>2. Terms of Use (CGU)</h3>
+        <p><strong>Acceptance.</strong> By using Divination you accept these terms in full. If you disagree, please do not use the service.</p>
+        <p><strong>Service description.</strong> Divination offers automated tarot card draws and AI-generated interpretations for entertainment purposes. Free users receive 3 readings per day; Premium subscribers receive unlimited readings, all spreads, and longer interpretations.</p>
+        <p><strong>Eligibility.</strong> You must be at least 16 years old to use Divination. Persons under 16 require parental consent in jurisdictions where such consent is required.</p>
+        <p><strong>Account.</strong> You agree to provide accurate information when creating an account and to keep your credentials secure. You are responsible for activity on your account.</p>
+        <p><strong>Acceptable use.</strong> You agree not to: (i) attempt to overload, attack, or reverse-engineer the service; (ii) use it for any unlawful purpose; (iii) abuse the AI model with harmful, harassing, or illegal content; (iv) circumvent rate limits or quotas.</p>
+        <p><strong>Suspension.</strong> We may suspend or terminate accounts that violate these terms, without notice and without refund.</p>
+        <p><strong>Intellectual property.</strong> The Divination interface, code, and visual assets are protected. AI-generated reading text is provided to you for personal use.</p>
+      </section>
+
+      <section id="legal-sale" class="legal-section">
+        <h3>3. Terms of Sale (CGV)</h3>
+        <p><strong>Premium subscription.</strong> €5 / month, billed monthly, auto-renewing until cancelled.</p>
+        <p><strong>Benefits:</strong> unlimited readings, all four spread types (Single Card, Yes/No, Past·Present·Future, Celtic Cross), longer and more detailed AI interpretations, 30-day reading history retention.</p>
+        <p><strong>Payment.</strong> Processed by <strong>Stripe</strong> (PCI-DSS certified). We never store your card details on our servers.</p>
+        <p><strong>Cancellation.</strong> You can cancel <strong>at any time</strong> from your account: <em>your name in top-right → Manage subscription</em> → Stripe Customer Portal. Cancellation takes effect at the end of the current billing period; you keep Premium access until then. <button class="legal-inline-btn" onclick="manageSubscription()">Open Subscription Portal →</button></p>
+        <p><strong>Right of withdrawal (EU consumers).</strong> In accordance with Article L221-28 1° of the French Code de la consommation (and equivalent EU regulations), by starting a Premium reading immediately after subscribing you expressly waive your 14-day right of withdrawal for digital services already performed. You retain the right to cancel future renewals at any time as described above.</p>
+        <p><strong>Refunds.</strong> No partial refunds are issued for the unused portion of a billing period. If you believe you were billed in error, contact us at novavelay.contact@gmail.com.</p>
+        <p><strong>Price changes.</strong> Any future price changes will be communicated by email at least 30 days in advance; you may cancel before they take effect.</p>
+      </section>
+
+      <section id="legal-privacy" class="legal-section">
+        <h3>4. Privacy Policy (RGPD)</h3>
+        <p><strong>Data controller:</strong> the operator listed in section 1. Contact: novavelay.contact@gmail.com.</p>
+        <p><strong>Data we collect:</strong></p>
+        <ul>
+          <li><em>Account:</em> email, first name, password (stored hashed with bcrypt — we never see your plaintext password).</li>
+          <li><em>Readings:</em> question text, cards drawn, AI interpretation, timestamps.</li>
+          <li><em>Quota / abuse prevention:</em> IP address (kept temporarily for daily quotas and rate limiting).</li>
+          <li><em>Billing:</em> Stripe customer ID and subscription status. Card details are stored by Stripe, never by us.</li>
+        </ul>
+        <p><strong>Purposes &amp; legal basis (GDPR Art. 6):</strong></p>
+        <ul>
+          <li>Account creation and authentication — <em>contract</em>.</li>
+          <li>Storing readings and history — <em>contract</em>.</li>
+          <li>Generating AI interpretations — <em>contract</em>.</li>
+          <li>Rate limiting and fraud prevention — <em>legitimate interest</em>.</li>
+          <li>Premium subscription billing — <em>contract</em>.</li>
+        </ul>
+        <p><strong>Third-party processors:</strong> Stripe (payments, EU), Groq (AI generation, US — readings are sent without your email/name), Supabase (database, EU), Render (backend, EU), Netlify (CDN, US/EU). For US transfers, Standard Contractual Clauses apply.</p>
+        <p><strong>Retention:</strong></p>
+        <ul>
+          <li>Readings: 7 days for free users, 30 days for Premium, then automatic deletion.</li>
+          <li>Account data: until you delete your account.</li>
+          <li>Billing records: kept by Stripe per legal retention requirements (typically 10 years for accounting).</li>
+        </ul>
+        <p><strong>Your rights:</strong> access, rectification, deletion, portability, restriction, objection, and the right to lodge a complaint with the CNIL (cnil.fr) or your local supervisory authority. Exercise these rights at novavelay.contact@gmail.com — we reply within 30 days.</p>
+        <p><strong>Account deletion:</strong> email novavelay.contact@gmail.com and we will delete your account, readings, and personal data within 30 days. Cancel any active subscription first.</p>
+        <p><strong>Security:</strong> HTTPS everywhere, hashed passwords (bcrypt), JWT authentication with strong rotating secret, rate limiting against brute force, SQL ORM (no injection), CORS restricted.</p>
+      </section>
+
+      <section id="legal-cookies" class="legal-section">
+        <h3>5. Cookies &amp; Local Storage</h3>
+        <p>Divination uses <strong>only strictly necessary technical storage</strong> — no advertising, analytics, or tracking.</p>
+        <ul>
+          <li><strong>localStorage:</strong> stores your authentication token (JWT) so you stay signed in across visits. No consent required (strictly necessary).</li>
+          <li><strong>No tracking cookies, no analytics cookies, no advertising cookies.</strong></li>
+          <li><strong>Stripe Checkout:</strong> when paying, Stripe may set cookies on their own domain (checkout.stripe.com) to secure the payment session. This is processed by Stripe under their own privacy policy.</li>
+        </ul>
+        <p>You can clear localStorage at any time via your browser settings (signing out clears it too).</p>
+      </section>
+
+      <section id="legal-disclaimer" class="legal-section">
+        <h3>6. Entertainment Disclaimer</h3>
+        <p class="legal-warning">
+          ⚠ <strong>This service is for entertainment and self-reflection purposes only.</strong>
+        </p>
+        <p>
+          Tarot card readings and the AI-generated interpretations produced by Divination
+          <strong>have no scientific basis</strong>, are <strong>not predictions of the future</strong>,
+          and <strong>must not be used as a basis</strong> for any decision concerning:
+        </p>
+        <ul>
+          <li><strong>Health, medicine, or psychology</strong> — always consult a doctor, psychologist, or qualified mental health professional.</li>
+          <li><strong>Finance or investment</strong> — always consult a certified financial advisor.</li>
+          <li><strong>Legal matters</strong> — always consult a qualified lawyer.</li>
+          <li><strong>Relationship, family, or life-changing decisions</strong> — seek qualified guidance from licensed professionals.</li>
+          <li><strong>Emergencies</strong> — if you are in crisis, call your local emergency services. In France: <strong>15</strong> (SAMU), <strong>112</strong> (EU emergency), <strong>3114</strong> (suicide prevention).</li>
+        </ul>
+        <p>
+          The operator declines all responsibility for any consequence resulting from a decision taken on the basis of a reading.
+          Divination is offered <em>"as is"</em>, without any warranty of accuracy, completeness, or fitness for any particular purpose.
+        </p>
+      </section>
+
+      <section id="legal-contact" class="legal-section">
+        <h3>7. Contact &amp; Complaints</h3>
+        <p>Any question, complaint, or RGPD request:</p>
+        <p style="font-size:1.1rem;"><strong>📧 novavelay.contact@gmail.com</strong></p>
+        <p>We aim to reply within 30 days for any data protection request.</p>
+        <p style="margin-top:1.5rem;">Last update: 2026-05-16.</p>
+      </section>
+
+    </div>
+  </main>
+
   <!-- ── AUTH MODAL ───────────────────────────────────────── -->
   <div class="modal-overlay" id="modal-auth" onclick="closeModalOnOverlay(event)">
     <div class="modal">
@@ -227,6 +370,20 @@
   </div>
 
   <div class="toast" id="toast"></div>
+
+  <!-- ── FOOTER ───────────────────────────────────────── -->
+  <footer class="site-footer">
+    <div>
+      <a href="#" onclick="event.preventDefault(); showView('legal')">Legal &amp; Terms</a>·
+      <a href="#" onclick="event.preventDefault(); showView('legal'); setTimeout(() => document.getElementById('legal-sale')?.scrollIntoView({behavior:'smooth'}), 100)">Terms of Sale</a>·
+      <a href="#" onclick="event.preventDefault(); showView('legal'); setTimeout(() => document.getElementById('legal-privacy')?.scrollIntoView({behavior:'smooth'}), 100)">Privacy</a>·
+      <a href="#" onclick="event.preventDefault(); showView('legal'); setTimeout(() => document.getElementById('legal-cookies')?.scrollIntoView({behavior:'smooth'}), 100)">Cookies</a>·
+      <a href="mailto:novavelay.contact@gmail.com">Contact</a>
+    </div>
+    <div class="disclaimer-mini">
+      ⚠ For entertainment only. Not medical, financial, or legal advice.
+    </div>
+  </footer>
 
   <!-- config.js sets window.API_BASE_URL for production; safe to omit locally -->
   <script src="config.js" onerror="void(0)"></script>
