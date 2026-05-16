@@ -32,6 +32,17 @@ def build_prompt(cartes: list[dict], type_tirage: str, is_premium: bool, questio
 
     question_block = f'\nThe seeker\'s question: "{question}"\n' if question.strip() else ""
 
+    # Special instructions for Yes/No spreads — must give a clear verdict
+    yesno_instructions = ""
+    if type_tirage == "oui_non":
+        yesno_instructions = (
+            "\n- This is a YES / NO reading. You MUST open with a clear, single-word verdict on its own line:\n"
+            "  • If the card is upright and its energy is favorable to the question → answer **YES**.\n"
+            "  • If the card is reversed or its energy is unfavorable → answer **NO**.\n"
+            "  • If the card is genuinely ambiguous (The Moon, The Hanged Man, etc.) → answer **MAYBE**.\n"
+            "  Then, in 2-4 short sentences, explain WHY the card gives this answer, with nuance.\n"
+        )
+
     return f"""You are a wise and compassionate tarot reader with deep mystical knowledge.
 You read the cards in English with poetic depth and emotional sensitivity.
 
@@ -46,7 +57,7 @@ Provide a {length} interpretation of this reading.
 - Interpret each card in its position, weaving them into a coherent narrative.
 - Close with a warm, encouraging message or a call to action.
 - Write in a mystical yet accessible tone — poetic but clear.
-- Do NOT start with "Sure", "Here is", or "Certainly". Begin the reading immediately."""
+- Do NOT start with "Sure", "Here is", or "Certainly". Begin the reading immediately.{yesno_instructions}"""
 
 
 async def generer_interpretation(

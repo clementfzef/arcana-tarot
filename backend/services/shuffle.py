@@ -11,7 +11,7 @@ TirageType = Literal["1_carte", "oui_non", "passe_present_futur", "croix_celtiqu
 # Positions pour chaque type de tirage
 POSITIONS = {
     "1_carte": ["Card of the Moment"],
-    "oui_non": ["Yes", "No"],
+    "oui_non": ["The Answer"],
     "passe_present_futur": ["Past", "Present", "Future"],
     "croix_celtique": [
         "Heart of the Matter",
@@ -24,7 +24,7 @@ POSITIONS = {
 
 NB_CARTES = {
     "1_carte": 1,
-    "oui_non": 2,
+    "oui_non": 1,
     "passe_present_futur": 3,
     "croix_celtique": 5,
 }
