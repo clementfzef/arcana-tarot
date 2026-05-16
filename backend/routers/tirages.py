@@ -6,7 +6,7 @@ Routes de tirage :
 """
 
 import uuid
-from datetime import date, timezone, datetime
+from datetime import date, timezone, datetime, timedelta
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -82,6 +82,12 @@ async def check_and_increment_quota(
 
 class TirageRequest(BaseModel):
     type: TirageType
+    question: str | None = None
+
+
+# Rétention : 7 jours pour les gratuits, 30 jours pour les premium
+RETENTION_DAYS_FREE = 7
+RETENTION_DAYS_PREMIUM = 30
 
 
 class CarteResult(BaseModel):
@@ -164,11 +170,15 @@ async def effectuer_tirage(
     # Sauvegarder le tirage si utilisateur connecté
     tirage_id = str(uuid.uuid4())
     if user:
+        retention_days = RETENTION_DAYS_PREMIUM if user.is_premium else RETENTION_DAYS_FREE
+        expires_at = datetime.now(timezone.utc) + timedelta(days=retention_days)
         tirage = Tirage(
             id=uuid.UUID(tirage_id),
             user_id=user.id,
             type=body.type,
+            question=body.question,
             cartes=cartes_jsonb,
+            expires_at=expires_at,
         )
         db.add(tirage)
 
@@ -196,13 +206,43 @@ async def streamer_interpretation(
     cartes = body.get("cartes", [])
     type_tirage = body.get("type", "1_carte")
     question = body.get("question", "")
+    tirage_id = body.get("tirage_id")
     is_premium = user.is_premium if user else False
 
     if not cartes:
         raise HTTPException(status_code=400, detail="Données du tirage manquantes")
 
+    # Wrapper qui collecte le texte complet et le sauvegarde à la fin si l'utilisateur est connecté
+    async def stream_and_save():
+        full_text_parts = []
+        async for chunk in generer_interpretation(cartes, type_tirage, is_premium, question):
+            # Extraire le token du SSE pour le collecter
+            if chunk.startswith("data: ") and '"token"' in chunk:
+                try:
+                    import json as _json
+                    payload = _json.loads(chunk[6:].strip())
+                    if "token" in payload:
+                        full_text_parts.append(payload["token"])
+                except Exception:
+                    pass
+            yield chunk
+
+        # Sauvegarder dans le tirage si possible
+        if user and tirage_id and full_text_parts:
+            try:
+                full_text = "".join(full_text_parts)
+                result = await db.execute(
+                    select(Tirage).where(Tirage.id == uuid.UUID(tirage_id), Tirage.user_id == user.id)
+                )
+                tirage = result.scalar_one_or_none()
+                if tirage:
+                    tirage.interpretation = full_text
+                    await db.commit()
+            except Exception:
+                pass
+
     return StreamingResponse(
-        generer_interpretation(cartes, type_tirage, is_premium, question),
+        stream_and_save(),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",
@@ -245,9 +285,22 @@ async def historique(
     db: AsyncSession = Depends(get_db),
     user: User | None = Depends(get_current_user),
 ):
-    """Retourne l'historique des tirages (utilisateur connecté uniquement)."""
+    """Retourne l'historique des tirages non-expirés (utilisateur connecté uniquement).
+    Supprime les tirages expirés au passage (lazy cleanup)."""
     if not user:
         raise HTTPException(status_code=401, detail="Connexion requise pour voir l'historique")
+
+    now = datetime.now(timezone.utc)
+
+    # Lazy cleanup : suppression des tirages expirés de l'utilisateur
+    from sqlalchemy import delete
+    await db.execute(
+        delete(Tirage).where(
+            Tirage.user_id == user.id,
+            Tirage.expires_at != None,  # noqa: E711
+            Tirage.expires_at < now,
+        )
+    )
 
     limit = None if user.is_premium else 10
     query = (
@@ -264,8 +317,11 @@ async def historique(
         {
             "id": str(t.id),
             "type": t.type,
+            "question": t.question,
             "cartes": t.cartes,
+            "interpretation": t.interpretation,
             "created_at": t.created_at.isoformat(),
+            "expires_at": t.expires_at.isoformat() if t.expires_at else None,
         }
         for t in tirages
     ]

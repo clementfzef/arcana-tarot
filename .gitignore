@@ -30,3 +30,6 @@ Thumbs.db
 credentials.json
 token.json
 node_modules/
+
+# Local Netlify folder
+.netlify

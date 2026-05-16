@@ -679,7 +679,82 @@ body:has(#view-home.active) .stars { display: none; }
   color: var(--gold);
 }
 .history-item-date { font-size: 0.75rem; color: var(--text-muted); }
-.history-item-cards { font-size: 0.8rem; color: var(--text-muted); }
+.history-item-cards { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.6rem; }
+.history-item-exp {
+  display: inline-block;
+  margin-left: 0.6rem;
+  font-size: 0.7rem;
+  color: var(--purple, #a48bd6);
+  opacity: 0.7;
+}
+.history-item-question {
+  font-style: italic;
+  color: var(--text-soft, #d4cfe0);
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
+}
+.history-item-preview {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  border-top: 1px solid var(--border);
+  padding-top: 0.6rem;
+  margin-top: 0.4rem;
+}
+.history-item-preview em { opacity: 0.6; }
+.history-note {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 1rem;
+  opacity: 0.7;
+  font-style: italic;
+}
+.history-detail {
+  max-width: 600px;
+  text-align: left;
+}
+.history-detail-type {
+  font-family: 'Cinzel', serif;
+  color: var(--gold);
+  font-size: 1.1rem;
+  text-align: center;
+}
+.history-detail-date {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 0.6rem;
+}
+.history-detail-question {
+  text-align: center;
+  font-style: italic;
+  color: var(--text-soft, #d4cfe0);
+  font-size: 1rem;
+  margin: 0.4rem 0;
+}
+.history-detail-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.history-card-line {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.5rem 0.8rem;
+  background: rgba(255,255,255,0.02);
+  border-radius: 8px;
+}
+.history-card-icon { font-size: 1.4rem; color: var(--gold); }
+.history-card-info { font-size: 0.9rem; }
+.history-card-pos { color: var(--text-muted); font-size: 0.82rem; margin-left: 0.4rem; }
+.history-detail-interp {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text);
+  white-space: pre-wrap;
+}
 
 /* ── PREMIUM PAGE ─────────────────────────────── */
 .premium-page {

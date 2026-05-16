@@ -93,7 +93,7 @@ async function askQuestion() {
     const res = await fetch(`${API}/tirages/`, {
       method: 'POST',
       headers: authHeaders(),
-      body: JSON.stringify({ type: currentSpread }),
+      body: JSON.stringify({ type: currentSpread, question: currentQuestion }),
     });
 
     if (res.status === 429) {
@@ -245,9 +245,10 @@ async function startInterpretation() {
       method: 'POST',
       headers: authHeaders(),
       body: JSON.stringify({
-        type:     currentSpread,
-        cartes:   lastTirageData.cartes,
-        question: currentQuestion,
+        type:      currentSpread,
+        cartes:    lastTirageData.cartes,
+        question:  currentQuestion,
+        tirage_id: lastTirageData.id,
       }),
     });
 
@@ -286,6 +287,8 @@ async function startInterpretation() {
 }
 
 // ── HISTORY ───────────────────────────────────────
+let historyCache = [];
+
 async function loadHistory() {
   const list = document.getElementById('history-list');
   list.innerHTML = '<div class="loading-spinner"></div>';
@@ -296,26 +299,79 @@ async function loadHistory() {
   try {
     const res = await fetch(`${API}/tirages/historique`, { headers: authHeaders() });
     const data = await res.json();
+    historyCache = data;
     if (!data.length) {
       list.innerHTML = `<div class="empty-state"><p>No readings yet.</p><button class="btn-primary" onclick="showView('home')">Ask a question</button></div>`;
       return;
     }
-    list.innerHTML = data.map(t => {
+    const retentionNote = currentUser.is_premium
+      ? '<div class="history-note">Readings are kept for 30 days.</div>'
+      : '<div class="history-note">Readings are kept for 7 days. Upgrade to Premium for 30 days.</div>';
+
+    list.innerHTML = retentionNote + data.map((t, idx) => {
       const date  = new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      const question = t.cartes[0]?.question || '';
+      const question = t.question || '';
       const names = t.cartes.map(c => c.nom).join(' · ');
-      return `<div class="history-item">
+      const expIn = t.expires_at ? Math.max(0, Math.ceil((new Date(t.expires_at) - new Date()) / 86400000)) : null;
+      const expBadge = expIn !== null ? `<span class="history-item-exp">expires in ${expIn}d</span>` : '';
+      return `<div class="history-item" onclick="openHistoryDetail(${idx})">
         <div class="history-item-header">
           <span class="history-item-type">${SPREAD_NAMES[t.type] || t.type}</span>
-          <span class="history-item-date">${date}</span>
+          <span class="history-item-date">${date}${expBadge}</span>
         </div>
         ${question ? `<div class="history-item-question">"${question}"</div>` : ''}
         <div class="history-item-cards">${names}</div>
+        <div class="history-item-preview">${t.interpretation ? t.interpretation.slice(0, 120) + '…' : '<em>tap to view reading</em>'}</div>
       </div>`;
     }).join('');
   } catch {
     list.innerHTML = `<div class="empty-state"><p>Unable to load history.</p></div>`;
   }
+}
+
+function openHistoryDetail(index) {
+  const t = historyCache[index];
+  if (!t) return;
+  const date = new Date(t.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+  let modal = document.getElementById('history-detail-overlay');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'history-detail-overlay';
+    modal.className = 'card-detail-overlay';
+    modal.onclick = (e) => { if (e.target === modal) closeHistoryDetail(); };
+    document.body.appendChild(modal);
+  }
+
+  const cardsHtml = t.cartes.map(c => `
+    <div class="history-card-line">
+      <span class="history-card-icon">${CARD_ICONS[c.id] || '✦'}</span>
+      <div class="history-card-info">
+        <strong>${c.nom}</strong>${c.inversee ? ' <em>(reversed)</em>' : ''}
+        ${c.position ? `<span class="history-card-pos">— ${c.position}</span>` : ''}
+      </div>
+    </div>`).join('');
+
+  modal.innerHTML = `
+    <div class="card-detail history-detail">
+      <button class="card-detail-close" onclick="closeHistoryDetail()">✕</button>
+      <div class="history-detail-type">${SPREAD_NAMES[t.type] || t.type}</div>
+      <div class="history-detail-date">${date}</div>
+      ${t.question ? `<div class="history-detail-question">"${t.question}"</div>` : ''}
+      <div class="card-detail-divider"></div>
+      <div class="history-detail-cards">${cardsHtml}</div>
+      <div class="card-detail-divider"></div>
+      <div class="history-detail-interp">${t.interpretation ? t.interpretation.replace(/\n/g, '<br>') : '<em>No interpretation was saved for this reading.</em>'}</div>
+    </div>`;
+
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeHistoryDetail() {
+  const modal = document.getElementById('history-detail-overlay');
+  if (modal) modal.classList.remove('active');
+  document.body.style.overflow = '';
 }
 
 // ── INIT ──────────────────────────────────────────

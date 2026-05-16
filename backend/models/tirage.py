@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import String, DateTime, ForeignKey, func
+from sqlalchemy import String, DateTime, ForeignKey, Text, func
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 from backend.db import Base
@@ -19,9 +19,12 @@ class Tirage(Base):
     type: Mapped[str] = mapped_column(
         String(50), nullable=False
     )  # '1_carte' | 'oui_non' | 'passe_present_futur' | 'croix_celtique'
+    question: Mapped[str | None] = mapped_column(Text, nullable=True)
     cartes: Mapped[dict] = mapped_column(JSONB, nullable=False)
-    # Exemple de structure cartes :
-    # [{"id": 0, "nom": "Le Mat", "position": "présent", "inversee": false, "interpretation": "..."}]
+    interpretation: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
+    )
+    expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, index=True
     )
