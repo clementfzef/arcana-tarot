@@ -83,7 +83,7 @@ async function fetchQuota() {
       badge.textContent = '∞ readings';
       badge.style.display = '';
     } else if (data.quota_restant !== null) {
-      badge.textContent = `${data.quota_restant}/${data.quota_total} free today`;
+      badge.innerHTML = `${data.quota_restant}/${data.quota_total}<span class="quota-suffix"> free today</span>`;
       badge.style.display = data.quota_restant > 0 ? '' : 'none';
     }
   } catch {}
