@@ -368,13 +368,13 @@ function openHistoryDetail(index) {
       <div class="history-detail-interp">${t.interpretation ? t.interpretation.replace(/\n/g, '<br>') : '<em>No interpretation was saved for this reading.</em>'}</div>
     </div>`;
 
-  modal.classList.add('active');
+  modal.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
 function closeHistoryDetail() {
   const modal = document.getElementById('history-detail-overlay');
-  if (modal) modal.classList.remove('active');
+  if (modal) modal.classList.remove('open');
   document.body.style.overflow = '';
 }
 
