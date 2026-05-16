@@ -19,42 +19,68 @@ SPREAD_NAMES = {
 }
 
 
+def _card_block(c: dict) -> str:
+    """Format a single card with explicit orientation + canonical meaning."""
+    name        = c["nom"]
+    position    = c["position"]
+    inversee    = bool(c.get("inversee"))
+    orientation = "REVERSED ↻" if inversee else "UPRIGHT ↑"
+    base_text   = (c.get("interpretation_statique") or "").strip()
+    keywords    = ", ".join(c.get("keywords", []))
+
+    return (
+        f"• Position \"{position}\" — {name} [{orientation}]\n"
+        f"  Keywords: {keywords}\n"
+        f"  Canonical meaning in this orientation: {base_text}"
+    )
+
+
 def build_prompt(cartes: list[dict], type_tirage: str, is_premium: bool, question: str = "") -> str:
     length = "detailed and rich (approximately 250 words per card)" if is_premium \
              else "concise and evocative (approximately 80 words per card)"
 
-    cards_text = "\n".join([
-        f"- Position \"{c['position']}\": {c['nom']}"
-        f"{' (reversed)' if c.get('inversee') else ''}"
-        f" — keywords: {', '.join(c.get('keywords', []))}"
-        for c in cartes
-    ])
+    cards_text = "\n\n".join(_card_block(c) for c in cartes)
+
+    # Count how many cards landed upright vs reversed — useful for spread overview
+    upright_count = sum(1 for c in cartes if not c.get("inversee"))
+    reversed_count = len(cartes) - upright_count
+    orientation_summary = f"Spread balance: {upright_count} upright · {reversed_count} reversed."
 
     question_block = f'\nThe seeker\'s question: "{question}"\n' if question.strip() else ""
+
+    # Orientation rules — explicit instructions on how to use upright vs reversed
+    orientation_rules = """
+ORIENTATION RULES (CRITICAL — apply faithfully):
+- UPRIGHT cards express the card's direct, manifest, outward energy. Lean into the canonical upright meaning given above.
+- REVERSED cards express the SHADOW side of that energy: the meaning may be blocked, internalised, delayed, denied, excessive, or expressed unhealthily. Interpret reversed cards through their canonical reversed meaning given above — do NOT simply invert keywords. They often signal something the seeker is resisting, has not yet integrated, or is being asked to release.
+- Treat reversed cards with compassion, never as "bad omens" — they are invitations to growth.
+- Mixing matters: if most cards are reversed, the reading is introspective / shadow work; if most are upright, the reading is active / outward-facing. Reflect that balance in your opening overview."""
 
     # Special instructions for Yes/No spreads — must give a clear verdict
     yesno_instructions = ""
     if type_tirage == "oui_non":
         yesno_instructions = (
             "\n- This is a YES / NO reading. You MUST open with a clear, single-word verdict on its own line:\n"
-            "  • If the card is upright and its energy is favorable to the question → answer **YES**.\n"
-            "  • If the card is reversed or its energy is unfavorable → answer **NO**.\n"
-            "  • If the card is genuinely ambiguous (The Moon, The Hanged Man, etc.) → answer **MAYBE**.\n"
-            "  Then, in 2-4 short sentences, explain WHY the card gives this answer, with nuance.\n"
+            "  • Upright + favorable energy for the question → **YES**.\n"
+            "  • Reversed OR clearly unfavorable energy → **NO**.\n"
+            "  • Genuinely ambiguous card (The Moon, The Hanged Man, The Hermit, The High Priestess in some contexts) → **MAYBE**.\n"
+            "  Then, in 2-4 short sentences, explain WHY using the canonical meaning above and acknowledge the card's orientation.\n"
         )
 
     return f"""You are a wise and compassionate tarot reader with deep mystical knowledge.
 You read the cards in English with poetic depth and emotional sensitivity.
 
 The seeker has drawn a {SPREAD_NAMES.get(type_tirage, 'tarot spread')}.
+{orientation_summary}
 {question_block}
 Cards drawn:
 {cards_text}
+{orientation_rules}
 
 Provide a {length} interpretation of this reading.
 - If a question was asked, address it directly through the lens of the cards.
-- Open with a 2-3 sentence overview of the energy of the spread.
-- Interpret each card in its position, weaving them into a coherent narrative.
+- Open with a 2-3 sentence overview of the spread's overall energy (reference the upright/reversed balance).
+- Interpret each card in its position, ALWAYS naming its orientation (upright or reversed) and weaving them into a coherent narrative.
 - Close with a warm, encouraging message or a call to action.
 - Write in a mystical yet accessible tone — poetic but clear.
 - Do NOT start with "Sure", "Here is", or "Certainly". Begin the reading immediately.{yesno_instructions}"""
