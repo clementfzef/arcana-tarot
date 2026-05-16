@@ -1133,3 +1133,185 @@ body:has(#view-home.active) .stars { display: none; }
 .form-checkbox label { cursor: pointer; }
 .form-checkbox a { color: var(--gold); text-decoration: underline; }
 .form-checkbox a:hover { color: var(--gold-light); }
+
+/* ── SIDE MENU ──────────────────────────────────── */
+.btn-menu-toggle {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--gold);
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.btn-menu-toggle:hover {
+  background: rgba(201,168,76,0.08);
+  border-color: var(--gold-dim);
+}
+.btn-menu-toggle svg { display: block; }
+
+.side-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 900;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition);
+}
+.side-menu-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 320px;
+  max-width: 88vw;
+  background: linear-gradient(180deg, #100b1f 0%, #08060f 100%);
+  border-left: 1px solid rgba(201,168,76,0.2);
+  box-shadow: -10px 0 40px rgba(0,0,0,0.7);
+  z-index: 950;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.side-menu.open { transform: translateX(0); }
+
+.side-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 1.4rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.side-menu-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  color: var(--gold);
+  letter-spacing: 0.2em;
+}
+.side-menu-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.3rem;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  transition: all var(--transition);
+}
+.side-menu-close:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+
+.side-menu-section { padding: 0.6rem 0.8rem; }
+
+.side-menu-user {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.8rem 0.6rem;
+}
+.side-menu-user-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--purple));
+  color: #0a0612;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.side-menu-user-name {
+  font-size: 0.95rem;
+  color: var(--text);
+  font-weight: 500;
+}
+.side-menu-user-status {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 0.1rem;
+}
+.side-menu-user-status.premium {
+  color: var(--gold);
+}
+
+.side-menu-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0.3rem 0.8rem;
+}
+
+.side-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  width: 100%;
+  padding: 0.85rem 0.9rem;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border-radius: 10px;
+  text-align: left;
+  text-decoration: none;
+  transition: background var(--transition), color var(--transition);
+}
+.side-menu-item:hover {
+  background: rgba(201,168,76,0.08);
+  color: var(--gold-light);
+}
+.side-menu-item.primary {
+  background: linear-gradient(135deg, rgba(201,168,76,0.15), rgba(107,63,160,0.1));
+  color: var(--gold);
+  border: 1px solid rgba(201,168,76,0.3);
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  justify-content: center;
+}
+.side-menu-item.danger { color: #e05c5c; }
+.side-menu-item.danger:hover { background: rgba(224,92,92,0.08); color: #ff7878; }
+
+.side-menu-icon {
+  width: 22px;
+  text-align: center;
+  color: var(--gold);
+  font-size: 1rem;
+  opacity: 0.8;
+}
+.side-menu-item:hover .side-menu-icon { opacity: 1; }
+.side-menu-item.danger .side-menu-icon { color: #e05c5c; }
+
+.side-menu-footer {
+  margin-top: auto;
+  padding: 1rem 1.4rem 1.4rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-align: center;
+  font-style: italic;
+  opacity: 0.7;
+}
+
+/* Reduce header mobile padding since fewer items now */
+@media (max-width: 640px) {
+  .header-inner { padding: 0 1.2rem; }
+}

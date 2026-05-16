@@ -38,29 +38,57 @@ async function initAuth() {
 
 // ── UPDATE UI ─────────────────────────────────────
 function updateUI(user) {
-  const btnLogin   = document.getElementById('btn-login');
-  const btnUser    = document.getElementById('btn-user');
-  const btnHistory = document.getElementById('btn-history');
-  const btnPremNav = document.getElementById('btn-premium-nav');
+  // Side menu sections
+  const sectionLoggedOut = document.getElementById('side-menu-loggedout');
+  const sectionLoggedIn  = document.getElementById('side-menu-loggedin');
+  const sectionLogout    = document.getElementById('side-menu-logout');
+  const itemHistory      = document.getElementById('side-menu-history');
+  const itemSub          = document.getElementById('side-menu-subscription');
+  const avatar           = document.getElementById('side-menu-avatar');
+  const nameEl           = document.getElementById('side-menu-user-name');
+  const statusEl         = document.getElementById('side-menu-user-status');
 
   if (user) {
-    btnLogin.style.display   = 'none';
-    btnUser.style.display    = 'inline-flex';
-    btnHistory.style.display = 'inline-flex';
-    btnUser.textContent      = user.prenom;
-    if (user.is_premium) {
-      btnPremNav.style.display = 'none';
+    if (sectionLoggedOut) sectionLoggedOut.style.display = 'none';
+    if (sectionLoggedIn)  sectionLoggedIn.style.display  = '';
+    if (sectionLogout)    sectionLogout.style.display    = '';
+    if (itemHistory)      itemHistory.style.display      = 'flex';
+    if (itemSub)          itemSub.style.display          = user.is_premium ? 'flex' : 'none';
+    if (avatar)           avatar.textContent             = (user.prenom || '?').charAt(0).toUpperCase();
+    if (nameEl)           nameEl.textContent             = user.prenom;
+    if (statusEl) {
+      statusEl.textContent = user.is_premium ? '✦ Premium member' : 'Free account';
+      statusEl.className   = 'side-menu-user-status' + (user.is_premium ? ' premium' : '');
     }
-    // Update spread cards for premium
     updateSpreadAccess(user.is_premium);
   } else {
-    btnLogin.style.display   = '';
-    btnUser.style.display    = 'none';
-    btnHistory.style.display = 'none';
+    if (sectionLoggedOut) sectionLoggedOut.style.display = '';
+    if (sectionLoggedIn)  sectionLoggedIn.style.display  = 'none';
+    if (sectionLogout)    sectionLogout.style.display    = 'none';
+    if (itemHistory)      itemHistory.style.display      = 'none';
+    if (itemSub)          itemSub.style.display          = 'none';
     updateSpreadAccess(false);
   }
   fetchQuota();
 }
+
+// Side menu toggle
+function toggleSideMenu() {
+  const menu = document.getElementById('side-menu');
+  const backdrop = document.getElementById('side-menu-backdrop');
+  if (!menu) return;
+  const isOpen = menu.classList.toggle('open');
+  if (backdrop) backdrop.classList.toggle('open', isOpen);
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+}
+
+// Close menu on Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const menu = document.getElementById('side-menu');
+    if (menu && menu.classList.contains('open')) toggleSideMenu();
+  }
+});
 
 function updateSpreadAccess(isPremium) {
   document.querySelectorAll('.spread-card.premium-lock').forEach(el => {
@@ -167,22 +195,16 @@ function logout() {
   clearToken();
   currentUser = null;
   updateUI(null);
-  toggleUserMenu();
   showView('home');
   showToast('Signed out.', 'success');
 }
 
-// ── USER MENU ─────────────────────────────────────
-function toggleUserMenu() {
-  const menu = document.getElementById('user-menu');
-  menu.style.display = menu.style.display === 'none' ? '' : 'none';
-}
+// Legacy compatibility (old user-menu was replaced by side menu)
+function toggleUserMenu() { /* no-op — kept for old onclick refs */ }
 document.addEventListener('click', (e) => {
-  const menu   = document.getElementById('user-menu');
-  const btnUser = document.getElementById('btn-user');
-  if (!menu.contains(e.target) && e.target !== btnUser) {
-    menu.style.display = 'none';
-  }
+  // Legacy listener — old user-menu DOM removed, kept guard against null
+  const menu = document.getElementById('user-menu');
+  if (menu && !menu.contains(e.target)) menu.style.display = 'none';
 });
 
 // ── STRIPE ────────────────────────────────────────

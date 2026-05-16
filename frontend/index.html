@@ -19,20 +19,78 @@
       <a href="#" class="logo" onclick="showView('home')">✦ DIVINATION</a>
       <nav class="nav">
         <span id="quota-badge" class="quota-badge" style="display:none"></span>
-        <button class="btn-ghost" id="btn-history" onclick="showView('history')" style="display:none">History</button>
-        <button class="btn-ghost" id="btn-premium-nav" onclick="showView('premium')">✦ Premium</button>
-        <button class="btn-ghost btn-legal" onclick="showView('legal')" title="Legal & Terms">⚖</button>
-        <button class="btn-ghost" id="btn-login" onclick="openModal('auth')">Sign in</button>
-        <button class="btn-ghost" id="btn-user" style="display:none" onclick="toggleUserMenu()"></button>
+        <button class="btn-menu-toggle" onclick="toggleSideMenu()" aria-label="Open menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
       </nav>
     </div>
-    <div class="user-menu" id="user-menu" style="display:none">
-      <div class="user-menu-item" onclick="showView('history')">My readings</div>
-      <div class="user-menu-item" onclick="manageSubscription()">Manage subscription</div>
-      <div class="user-menu-item" onclick="showView('legal')">Legal & Terms</div>
-      <div class="user-menu-item danger" onclick="logout()">Sign out</div>
-    </div>
   </header>
+
+  <!-- ── SIDE MENU ────────────────────────────────────────── -->
+  <div class="side-menu-backdrop" id="side-menu-backdrop" onclick="toggleSideMenu()"></div>
+  <aside class="side-menu" id="side-menu">
+    <div class="side-menu-header">
+      <span class="side-menu-title">✦ Menu</span>
+      <button class="side-menu-close" onclick="toggleSideMenu()" aria-label="Close menu">✕</button>
+    </div>
+
+    <!-- Logged-out state -->
+    <div class="side-menu-section" id="side-menu-loggedout">
+      <button class="side-menu-item primary" onclick="toggleSideMenu(); openModal('auth')">
+        <span class="side-menu-icon">→</span> Sign in / Create account
+      </button>
+    </div>
+
+    <!-- Logged-in state -->
+    <div class="side-menu-section" id="side-menu-loggedin" style="display:none">
+      <div class="side-menu-user">
+        <div class="side-menu-user-avatar" id="side-menu-avatar">C</div>
+        <div>
+          <div class="side-menu-user-name" id="side-menu-user-name">—</div>
+          <div class="side-menu-user-status" id="side-menu-user-status">Free account</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-menu-divider"></div>
+
+    <div class="side-menu-section">
+      <button class="side-menu-item" onclick="toggleSideMenu(); showView('home')">
+        <span class="side-menu-icon">✦</span> New reading
+      </button>
+      <button class="side-menu-item" id="side-menu-history" onclick="toggleSideMenu(); showView('history')" style="display:none">
+        <span class="side-menu-icon">⌛</span> My readings
+      </button>
+      <button class="side-menu-item" onclick="toggleSideMenu(); showView('premium')">
+        <span class="side-menu-icon">✧</span> Premium
+      </button>
+      <button class="side-menu-item" id="side-menu-subscription" onclick="toggleSideMenu(); manageSubscription()" style="display:none">
+        <span class="side-menu-icon">⚙</span> Manage subscription
+      </button>
+    </div>
+
+    <div class="side-menu-divider"></div>
+
+    <div class="side-menu-section">
+      <button class="side-menu-item" onclick="toggleSideMenu(); showView('legal')">
+        <span class="side-menu-icon">⚖</span> Legal &amp; Terms
+      </button>
+      <a class="side-menu-item" href="mailto:novavelay.contact@gmail.com">
+        <span class="side-menu-icon">✉</span> Contact
+      </a>
+    </div>
+
+    <div class="side-menu-section" id="side-menu-logout" style="display:none">
+      <div class="side-menu-divider"></div>
+      <button class="side-menu-item danger" onclick="toggleSideMenu(); logout()">
+        <span class="side-menu-icon">⎋</span> Sign out
+      </button>
+    </div>
+
+    <div class="side-menu-footer">
+      <p>⚠ For entertainment only. Not medical, financial, or legal advice.</p>
+    </div>
+  </aside>
 
   <!-- ══════════════════════════════════════════════════════
        HOME VIEW — Question input
